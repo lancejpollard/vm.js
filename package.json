@@ -1,0 +1,28 @@
+{
+  "name": "@lancejpollard/vm.js",
+  "version": "1.0.2",
+  "description": "Simplified Virtual Machine demo in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lancejpollard/vm.js.git"
+  },
+  "keywords": [
+    "terraform",
+    "builder",
+    "cloud",
+    "infrastructure"
+  ],
+  "author": "Lance Pollard <lp@elk.fm>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lancejpollard/vm.js/issues"
+  },
+  "homepage": "https://github.com/lancejpollard/vm.js#readme",
+  "files": [
+    "index.js"
+  ]
+}
