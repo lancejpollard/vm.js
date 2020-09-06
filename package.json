@@ -1,7 +1,7 @@
 {
   "name": "@lancejpollard/vm.js",
-  "version": "1.0.2",
-  "description": "Simplified Virtual Machine demo in JavaScript",
+  "version": "0.0.2",
+  "description": "Minimal Virtual Machine Demo in JavaScript",
   "main": "index.js",
   "scripts": {
     "test": "npm test"
