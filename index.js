@@ -1,4 +1,45 @@
 
+let MAX = 16777216
+let bins = [
+  [], // 1 = 32
+  [], // 2 = 64
+  [], // 3 = 128
+  [], // 4 = 256
+  [], // 5 = 512
+  [], // 6 = 1024
+  [], // 7 = 2048
+  [], // 8 = 4096
+  [], // 9 = 8192
+  [], // 10 = 16384
+  [], // 11 = 32768
+  [], // 12 = 65536
+  [], // 13 = 131072
+  [], // 14 = 262144
+  [], // 15 = 524288
+  [], // 16 = 1048576
+  [], // 17 = 2097152
+  [], // 18 = 4194304
+  [], // 19 = 8388608
+  [0, MAX], // 20 = 16777216
+]
+
+// const a = fetchBlock(1)
+// const b = fetchBlock(1)
+// const c = fetchBlock(1)
+// const d = fetchBlock(1)
+// const e = fetchBlock(1)
+// const f = fetchBlock(1)
+// const g = fetchBlock(1)
+// const h = fetchBlock(1)
+// const i = fetchBlock(1)
+// const j = fetchBlock(1)
+// returnBlockToBin(1, a)
+// returnBlockToBin(1, c)
+// returnBlockToBin(1, e)
+// returnBlockToBin(1, g)
+// returnBlockToBin(1, i)
+// console.log(bins)
+
 // 1 == fiber pointer
 // 2 == stack pointer
 // 3 == stack pointer size
@@ -17,6 +58,32 @@ var native_store = []
 var action_store = []
 var store = [ action_store, native_store, action_store ]
 
+// allocate
+//   0. If not store is initialized, initialize.
+//     1. Get the max memory size.
+//     2. Find nearest power of two.
+//     3. Divide by four.
+//     4. Store one.
+//     5. Loop, split each level in half.
+//   1. Fetch level
+//     2. if not level, go up a level.
+//     3. Keep going up until find a level.
+//     4. Split down.
+//     5. Grab the level node.
+
+// build array
+//   1. generate numbers based on size.
+//   2. for each number...
+//     1. allocate memory for array of that size.
+//     2. For each item...
+//       1. merge into allocation space.
+//     3. Link the allocation array address.
+
+// clear node
+//   1. put back into appropriate slot.
+//     1. if there are two in that slot, then merge and push up.
+//     2. continue merging and bringing upward.
+
 action(function(){})
 
 action(function(str){
@@ -26,6 +93,21 @@ action(function(str){
 action(function(){
   let str = get_actual_input(1)
   action_store[0](str)
+})
+
+action(function(a, b){
+  return a + b
+})
+
+action(function(){
+  let a = get_actual_input(1)
+  let b = get_actual_input(2)
+  let c = action_store[2](a, b)
+  action_store[5](c)
+})
+
+action(function(){
+  // store return value
 })
 
 module.exports = start
@@ -126,6 +208,10 @@ function set_binary_value(i, val) {
   binary_store[i] = val
 }
 
+function get_binary_value(i) {
+  return binary_store[i]
+}
+
 function set_value(i) {
   let stack_pointer = get_current_stack_pointer()
   let env_pointer = binary_store[stack_pointer + 1]
@@ -149,17 +235,17 @@ function binary_store_return(val) {
   let return_storage_address = stack_pointer - 1
   binary_store[return_storage_address] = i
   let start_gc_list = binary_store[9]
-  let front = binary_store[start_gc_list + 1]
-  binary_store[front + 1] = type
-  binary_store[front + 2] = i
-  binary_store[front + 3] = front
+  let end = binary_store[start_gc_list + 1]
+  binary_store[end + 1] = type
+  binary_store[end + 2] = i
+  binary_store[end + 3] = end
 }
 
 function recycle() {
   while (true) {
-    if (!binary_store[front]) {
-      binary_store[front] = 2 // mark it
-      front = binary_store[front + 3]
+    if (!binary_store[end]) {
+      binary_store[end] = 2 // mark it
+      end = binary_store[end + 3]
     }
   }
 }
@@ -183,30 +269,30 @@ function shift(i) {
 }
 
 function clear_binary_store(address, size) {
-  let m_start = binary_store[6]
-  let front = binary_store[m_start + 2]
-  binary_store[front + 1] = address
-  binary_store[front + 2] = size
+  let m_start = get_memory_free()
+  let end = binary_store[m_start + 2]
+  binary_store[end + 1] = address
+  binary_store[end + 2] = size
 }
 
 function stack_binary_store(i) {
-  let m_start = binary_store[6]
-  binary_store[m_start] == start address
-  binary_store[m_start + 1] == size
-  binary_store[m_start + 2] == front memory block
-  binary_store[m_start + 3] == start memory block
+  let m_start = get_memory_free()
+  // binary_store[m_start] == start address
+  // binary_store[m_start + 1] == size
+  // binary_store[m_start + 2] == end memory block
+  // binary_store[m_start + 3] == start memory block
 
-  if (i <= size) {
-    let address = binary_store[m_start]
-    binary_store[address] = start block
-    binary_store[address + 1] = front block
-    binary_store[m_start] = address + i
-    return address
-  } else {
-    let address = binary_store[m_start]
-    binary_store[m_start] = address + size
-    // more addresses
-  }
+  // if (i <= size) {
+  //   let address = binary_store[m_start]
+  //   binary_store[address] = start block
+  //   binary_store[address + 1] = end block
+  //   binary_store[m_start] = address + i
+  //   return address
+  // } else {
+  //   let address = binary_store[m_start]
+  //   binary_store[m_start] = address + size
+  //   // more addresses
+  // }
 }
 
 function merge_data(data) {
@@ -251,13 +337,13 @@ function get_now() {
 }
 
 function start_next() {
-  set_binary_value(x, get_now())
+  set_binary_value(12, get_now())
   start_loop()
   setImmediate(start_next)
 }
 
 function check_loop() {
-  return check_not(...)
+  return check_not(get_binary_value(13))
 }
 
 function check_not(x) {
@@ -270,8 +356,8 @@ function start_loop() {
 
 function start_loop_eval() {
   start_loop2()
-  var front = get_now()
-  var shift = sub(front, start)
+  var end = get_now()
+  var shift = sub(end, start)
   var clear = gt(shift, 16)
   set_binary_value(11, clear)
 }
@@ -341,4 +427,106 @@ function process_fiber_instruction() {
   const index = binary_store[stack_pointer]
   call(index)
   binary_store[stack_pointer] = binary_store[stack_pointer + 1]
+}
+
+function split(number) {
+  const result = [0, 0, 0, 0, 0, 0, 0, 0]
+  let unit = 128
+  let index = 7
+  while (unit > 0) {
+    while (number >= unit) {
+      result[index]++
+      number -= unit
+    }
+    index -= 1
+    unit >>= 1
+  }
+  return result
+}
+
+function combine(bin, a, i) {
+  let x = bin[a]
+  bin.splice(a, 2)
+  let j = i + 1
+  if (j < bins.length) {
+    returnBlockToBin(j, x)
+  }
+}
+
+function returnBlockToBin(i, v) {
+  let bin = bins[i]
+  let x = getSortedIndex(bin, v)
+  bin.splice(x, 0, v)
+  let a = x - 1
+  let b = x + 1
+  let m = 2 ** (i + 5)
+  if (i < bins.length - 1) {
+    let combined = false
+    if (a > -1) {
+      let l = bin[a]
+      if (l + m == v) {
+        combine(bin, a, i)
+        combined = true
+      }
+    }
+    if (!combined && b < bin.length) {
+      let r = bin[b]
+      if (r - m == v) {
+        combine(bin, x, i)
+      }
+    }
+  }
+}
+
+function getSortedIndex(array, value) {
+  let low = 0
+  let high = array.length
+
+  while (low < high) {
+    let mid = (low + high) >>> 1
+    if (array[mid] < value) {
+      low = mid + 1
+    } else {
+      high = mid
+    }
+  }
+
+  return low
+}
+
+function fetchBlock(i) {
+  let bin = bins[i]
+
+  if (bin.length) {
+    return bin.shift()
+  }
+
+  // find in upper bin
+  let j = i + 1
+  while (true) {
+    let upper_bin = bins[j]
+    if (upper_bin.length) {
+      let x = upper_bin.shift()
+      let a = x
+      let b = x + (Math.pow(2, 4 + j + 1) / 2)
+      j = j - 1
+      let lower_bin = bins[j]
+      lower_bin.push(a, b)
+      break
+    }
+    j++
+  }
+
+  // propagate to lower bins
+  while (j > i) {
+    let upper_bin = bins[j]
+    let x = upper_bin.shift()
+    let a = x
+    let b = x + (Math.pow(2, 4 + j + 1) / 2)
+    j = j - 1
+    let lower_bin = bins[j]
+    lower_bin.push(a, b)
+  }
+
+  return bin.shift()
 }
